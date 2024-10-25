@@ -1,15 +1,15 @@
 from django.urls import path
 
 from studies.apps import StudiesConfig
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
 from studies.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, LessonRetrieveAPIView, \
     LessonUpdateAPIView, LessonDestroyAPIView
 
 app_name = StudiesConfig.name
 
-router = DefaultRouter()
-router.register(r'course', viewset=CourseViewSet, basename='Course')
+router = SimpleRouter()
+router.register('', viewset=CourseViewSet)
 
 urlpatterns = [
     path('lesson/create/', LessonCreateAPIView.as_view(), name='lesson-create'),
