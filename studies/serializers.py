@@ -31,6 +31,7 @@ class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
     subscription = serializers.SerializerMethodField(read_only=True)
 
+
     def get_len_lessons(self, obj):
         return obj.lessons.count()
 
@@ -41,6 +42,6 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'title', 'owner', 'preview', 'description', 'len_lessons', 'lessons', 'subscription')
+        fields = ('id', 'title', 'owner', 'preview', 'description', 'len_lessons', 'lessons', 'subscription', 'price')
 
 
