@@ -7,7 +7,6 @@ from django.db import models
 from studies.models import Course, Lesson
 
 
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -39,7 +38,6 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
 
         return self._create_user(email, password, **extra_fields)
-
 
 
 class User(AbstractUser):
@@ -83,3 +81,12 @@ class Payment(models.Model):
                                      null=True)
     amount = models.PositiveSmallIntegerField(verbose_name='Сумма платежа')
     payment_method = models.CharField(verbose_name='Способ оплаты', max_length=10, choices=PAYMENT_METHODS)
+    session_id = models.CharField(max_length=255, verbose_name='id сессии', blank=True, null=True)
+    link = models.URLField(max_length=400, verbose_name='ссылка для платежа', blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+
+    def __str__(self):
+        return self.amount
