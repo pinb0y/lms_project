@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 
 from users.models import Payment, User
 from users.serializers import PaymentSerializer, UserSerializer
-from users.services import create_stripe_price, create_stripe_sessions
+from users.services import create_stripe_price, create_stripe_sessions, create_stripe_product
 
 
 class PaymentListAPIView(generics.ListAPIView):
@@ -15,17 +15,20 @@ class PaymentListAPIView(generics.ListAPIView):
     filterset_fields = ('payed_course', 'payed_lesson', 'payment_method',)
     ordering_fields = ('payment_date',)
 
+
 class PaymentCreateAPIView(CreateAPIView):
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
 
     def perform_create(self, serializer):
         payment = serializer.save(user=self.request.user)
-        price = create_stripe_price(payment.amount)
+        course_id = create_stripe_product(payment)
+        price = create_stripe_price(payment.amount, course_id)
         session_id, payment_link = create_stripe_sessions(price)
         payment.session_id = session_id
         payment.link = payment_link
         payment.save()
+
 
 class UserCreateAPIView(CreateAPIView):
     serializer_class = UserSerializer
@@ -37,17 +40,21 @@ class UserCreateAPIView(CreateAPIView):
         user.set_password(user.password)
         user.save()
 
+
 class UserListAPIView(ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
 
 class UserRetrieveAPIView(RetrieveAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+
 class UserUpdateAPIView(UpdateAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
 
 class UserDestroyAPIView(DestroyAPIView):
     serializer_class = UserSerializer
