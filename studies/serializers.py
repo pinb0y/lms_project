@@ -29,19 +29,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     len_lessons = serializers.SerializerMethodField(read_only=True)
     lessons = LessonSerializer(many=True, read_only=True)
-    subscription = serializers.SerializerMethodField(read_only=True)
+    sign_up = serializers.SerializerMethodField(source='subscription_course', read_only=True)
 
 
     def get_len_lessons(self, obj):
         return obj.lessons.count()
 
-    def get_subscription(self, obj):
-        if obj.subscription_set.exists() and obj.owner == obj.subscription_set.first().user:
-            return 'подписка оформлена'
-        return 'нет подписки'
+    def get_sign_up(self, instance):
+        user = self.context['request'].user
+        return Subscription.objects.filter(user=user).filter(course=instance).exists()
 
     class Meta:
         model = Course
-        fields = ('id', 'title', 'owner', 'preview', 'description', 'len_lessons', 'lessons', 'subscription', 'price')
+        fields = '__all__'
 
 

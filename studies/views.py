@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from studies.models import Course, Lesson, Subscription
 from studies.paginators import LessonPaginator
 from studies.serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
+from studies.tasks import update_notification
 from users.models import User
 from users.permissions import IsModerator, IsOwner
 
@@ -19,6 +20,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         if isinstance(self.request.user, User):
             serializer.save(owner=self.request.user)
         serializer.save()
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        update_notification.delay(instance.pk)
+        instance.save()
+        return instance
 
     def get_permissions(self):
         if self.action in ['create', 'destroy']:
@@ -44,6 +51,7 @@ class LessonListAPIView(generics.ListAPIView):
     pagination_class = LessonPaginator
     permission_classes = (IsAuthenticated,)
 
+
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
@@ -63,6 +71,9 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
 
 class SubscriptionAPIView(views.APIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, *args, **kwargs):
         user = self.request.user
@@ -75,6 +86,7 @@ class SubscriptionAPIView(views.APIView):
             'results': serializer.data,
             'detail': f'Курс {course_item.title} сохранен в подписки'
         }
+
         return Response(response, status.HTTP_201_CREATED)
 
     def delete(self, *args, **kwargs):
