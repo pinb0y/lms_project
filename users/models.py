@@ -84,6 +84,7 @@ class Payment(models.Model):
     session_id = models.CharField(max_length=255, verbose_name='id сессии', blank=True, null=True)
     link = models.URLField(max_length=400, verbose_name='ссылка для платежа', blank=True, null=True)
 
+
     class Meta:
         verbose_name = "Платеж"
         verbose_name_plural = "Платежи"
